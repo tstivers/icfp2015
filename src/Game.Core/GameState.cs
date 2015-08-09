@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 
 namespace Game.Core
 {
@@ -15,11 +14,6 @@ namespace Game.Core
 
     public class GameState
     {
-        private static readonly SizeF OffsetE = new SizeF(1, 0);
-        private static readonly SizeF OffsetW = new SizeF(-1, 0);
-        private static readonly SizeF OffsetSe = new SizeF(0.5f, 1);
-        private static readonly SizeF OffsetSw = new SizeF(-0.5f, 1);
-
         public GameState(Problem problem, IController controller)
         {
             Problem = problem;
@@ -31,12 +25,12 @@ namespace Game.Core
         public BoardState BoardState { get; set; }
         public IController Controller { get; set; }
         private LinearCongruentGenerator LCG { get; set; }
-        public Unit CurrentUnit { get; private set; }
-        public Unit NextUnit { get; private set; }
-        public PointF CurrentUnitPosition { get; set; }
+        protected Unit CurrentUnit { get; private set; }
+        protected Unit NextUnit { get; private set; }
+        public Point CurrentUnitPosition { get; set; }
+        public Point[] CurrentUnitCells { get; set; }
         public int UnitsLeft { get; private set; }
         public int Score { get; private set; }
-
         public List<Direction> Moves { get; } = new List<Direction>();
 
         public void Reset(int gameNumber)
@@ -66,17 +60,7 @@ namespace Game.Core
             CurrentUnitPosition = CalcStartingPosition(CurrentUnit);
         }
 
-        public IEnumerable<Cell> GetCurrentUnitCells(float dx, float dy)
-        {
-            foreach (var cell in CurrentUnit.Members)
-            {
-                var x = cell.X + (int) (dx + (cell.Y/2.0));
-                var y = cell.Y + (int) dy;
-                yield return new Cell(x, y);
-            }
-        }
-
-        public PointF CalcStartingPosition(Unit unit)
+        public Point CalcStartingPosition(Unit unit)
         {
             var max = new Cell();
             var min = new Cell(int.MaxValue, int.MaxValue);
@@ -93,10 +77,16 @@ namespace Game.Core
 
             var x = (int) Math.Floor(BoardState.Width/2.0 - unitWidth/2.0);
             var y = 0 - min.Y;
-            var pos = new PointF(x, y);
-            if (MoveIsLocked(pos))
+            var pos = new Point(x, y);
+
+            CurrentUnitCells = new Point[unit.Members.Length];
+            for (int i = 0; i < unit.Members.Length; i++)            
+                CurrentUnitCells[i] = new Point(unit.Members[i].X + pos.X, unit.Members[i].Y + pos.Y);            
+
+            if (BoardIsLocked())
             {
                 CurrentUnit = null;
+                CurrentUnitCells = null;
                 throw new GameOverException();
             }
 
@@ -104,12 +94,10 @@ namespace Game.Core
         }
 
         public bool MoveWillLock(Direction direction)
-        {
-            var offset = GetOffset(direction);
-            var x = CurrentUnitPosition.X + offset.Width;
-            var y = CurrentUnitPosition.Y + offset.Height;
+        {            
+            var newCells = GetTranslatedPoints(CurrentUnitCells, direction);
 
-            foreach (var cell in GetCurrentUnitCells(x, y))
+            foreach (var cell in newCells)
             {
                 if (cell.X < 0 || cell.X >= BoardState.Width)
                     return true;
@@ -124,18 +112,31 @@ namespace Game.Core
             return false;
         }
 
-        public static SizeF GetOffset(Direction direction)
+        public Point[] GetTranslatedPoints(Point[] points, Direction direction)
+        {
+            var translated = new Point[points.Length];
+            for (int i = 0; i < points.Length; i++)
+                translated[i] = GetNewPos(points[i], direction);
+
+            return translated;
+        }
+
+        public static Point GetNewPos(Point current, Direction direction)
         {
             switch (direction)
             {
                 case Direction.E:
-                    return OffsetE;
+                    return new Point(current.X + 1, current.Y);
                 case Direction.SE:
-                    return OffsetSe;
+                    return current.Y%2 == 1
+                        ? new Point(current.X + 1, current.Y + 1)
+                        : new Point(current.X, current.Y + 1);
                 case Direction.SW:
-                    return OffsetSw;
+                    return current.Y%2 == 1
+                        ? new Point(current.X, current.Y + 1)
+                        : new Point(current.X - 1, current.Y + 1);
                 case Direction.W:
-                    return OffsetW;
+                    return new Point(current.X - 1, current.Y);
                 default:
                     throw new ArgumentException();
             }
@@ -149,7 +150,7 @@ namespace Game.Core
             if (MoveWillLock(direction))
             {
                 // update board state
-                foreach (var cell in GetCurrentUnitCells(CurrentUnitPosition.X, CurrentUnitPosition.Y))
+                foreach (var cell in CurrentUnitCells)
                 {
                     BoardState.Cells[cell.X, cell.Y] = CellState.Filled;
                 }
@@ -168,7 +169,8 @@ namespace Game.Core
             }
             else
             {
-                CurrentUnitPosition += GetOffset(direction);
+                CurrentUnitPosition = GetNewPos(CurrentUnitPosition, direction);
+                CurrentUnitCells = GetTranslatedPoints(CurrentUnitCells, direction);
             }
             return true;
         }
@@ -178,9 +180,14 @@ namespace Game.Core
             return true;
         }
 
-        public bool MoveIsLocked(PointF current)
+        public bool BoardIsLocked()
         {
-            foreach (var cell in GetCurrentUnitCells(current.X, current.Y))
+            return CellsAreLocked(CurrentUnitCells);
+        }
+
+        public bool CellsAreLocked(Point[] cells)
+        {
+            foreach (var cell in cells)
             {
                 if (cell.X < 0 || cell.X >= BoardState.Width)
                     return true;

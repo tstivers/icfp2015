@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -70,36 +71,41 @@ namespace Game.Running.Winforms
 
         private void button2_Click(object sender, EventArgs e)
         {
-            try
+            var outputs = new List<Output>();
+            for (int i = 0; i < CurrentGameState.Problem.SourceSeeds.Length; i++)
             {
-                while (true)
+                CurrentGameState.Reset(i);
+                try
                 {
-                    LockSpaceSearcher = new LockSpaceSearcher();
-                    LockSpaceSearcher.GameState = CurrentGameState;
-                    LockSpaceSearcher.GenerateLockResults();
-
-                    var lowest = LockSpaceSearcher.LockResults.OrderBy(x => -x.Key.Y).First();
-                    foreach (var d in lowest.Value.Directions[0])
+                    while (true)
                     {
-                        CurrentGameState.ExecuteMove(d);
-                    }
-                    
-                }
-            }
-            catch (GameOverException)
-            {
-                RefreshGameState();
-                var output = new Output
-                {
-                    problemId = CurrentGameState.Problem.Id,
-                    seed = CurrentGameState.Problem.SourceSeeds[0],
-                    tag = string.Format("score_" + CurrentGameState.Score),
-                    solution = CurrentGameState.Moves.ToSolutionString()
-                };
+                        LockSpaceSearcher = new LockSpaceSearcher();
+                        LockSpaceSearcher.GameState = CurrentGameState;
+                        LockSpaceSearcher.GenerateLockResults();
 
-                File.WriteAllText("out.json", JsonConvert.SerializeObject(new [] { output} ));
-                SolutionBox.Text = CurrentGameState.Moves.ToSolutionString();
+                        var lowest = LockSpaceSearcher.LockResults.OrderBy(x => -x.Key.Y).First();
+                        foreach (var d in lowest.Value.Directions[0])
+                        {
+                            CurrentGameState.ExecuteMove(d);
+                        }
+
+                    }
+                }
+                catch (GameOverException)
+                {
+                    outputs.Add(new Output
+                    {
+                        problemId = CurrentGameState.Problem.Id,
+                        seed = CurrentGameState.Problem.SourceSeeds[i],
+                        tag = string.Format("score_" + CurrentGameState.Score),
+                        solution = CurrentGameState.Moves.ToSolutionString()
+                    });
+                }
+
             }
+
+            File.WriteAllText("out.json", JsonConvert.SerializeObject(outputs));
+            SolutionBox.Text = CurrentGameState.Moves.ToSolutionString();
         }
 
         private void SolutionBox_TextChanged(object sender, EventArgs e)

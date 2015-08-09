@@ -40,21 +40,14 @@ namespace Game.Running.Winforms
                             ? Color.OrangeRed
                             : DefaultBackColor;
 
-                if (_gameState.CurrentUnit != null)
+                if (_gameState.CurrentUnitCells != null)
                 {
-                    foreach (var cell in _gameState.GetCurrentUnitCells(_gameState.CurrentUnitPosition.X, _gameState.CurrentUnitPosition.Y))
+                    foreach (var cell in _gameState.CurrentUnitCells)
                     {                        
                         Board.Hexes[cell.Y, cell.X]
                             .HexState.BackgroundColor = Color.Aqua;
                     }
-
-                    Board.BoardState.ActiveHexBorderColor = Color.Crimson;
-                    Board.BoardState.ActiveHex =
-                        Board.Hexes[
-                            _gameState.CurrentUnit.Pivot.Y + (int)_gameState.CurrentUnitPosition.Y,
-                            _gameState.CurrentUnit.Pivot.X + (int)_gameState.CurrentUnitPosition.X];
                 }
-
 
                 GraphicsEngine?.Draw(pe.Graphics);
             }

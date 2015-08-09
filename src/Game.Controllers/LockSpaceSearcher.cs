@@ -5,42 +5,48 @@ using Game.Core;
 
 namespace Game.Controllers
 {
+    public class UnitState
+    {
+        public Point pos { get; set; }
+        public Point[] Cells { get; set; }
+    }
+
     public class LockSpaceSearcher
     {
         public GameState GameState { get; set; }
-        public Dictionary<PointF, LockResult> LockResults { get; set; } = new Dictionary<PointF, LockResult>();
+        public Dictionary<Point, LockResult> LockResults { get; set; } = new Dictionary<Point, LockResult>();
 
         public void GenerateLockResults()
         {
-            var closed_set = new HashSet<PointF>();
-            var came_from = new Dictionary<PointF, PointF>();
-            var open_set = new Queue<PointF>();
-            var open_set_hash = new HashSet<PointF>();
-            open_set.Enqueue(GameState.CurrentUnitPosition);
+            var closed_set = new HashSet<Point>();
+            var came_from = new Dictionary<Point, Point>();
+            var open_set = new Queue<UnitState>();
+            var open_set_hash = new HashSet<Point>();
+            open_set.Enqueue(new UnitState() {pos =  GameState.CurrentUnitPosition, Cells = GameState.CurrentUnitCells});
 
             while (open_set.Count != 0)
             {
                 var current = open_set.Dequeue();
 
-                if (GameState.MoveIsLocked(current))
-                    ReconstructPath(came_from, GameState.CurrentUnitPosition, current);
+                if (GameState.CellsAreLocked(current.Cells))
+                    ReconstructPath(came_from, GameState.CurrentUnitPosition, current.pos);
                 else
                 {
-                    closed_set.Add(current);
+                    closed_set.Add(current.pos);
                     foreach (var neighbor in GetNeighbors(current))
                     {
-                        if (!closed_set.Contains(neighbor) && !open_set_hash.Contains(neighbor))
+                        if (!closed_set.Contains(neighbor.pos) && !open_set_hash.Contains(neighbor.pos))
                         {
                             open_set.Enqueue(neighbor);
-                            open_set_hash.Add(neighbor);
-                            came_from[neighbor] = current;
+                            open_set_hash.Add(neighbor.pos);
+                            came_from[neighbor.pos] = current.pos;
                         }
                     }
                 }
             }
         }
 
-        public void ReconstructPath(Dictionary<PointF, PointF> came_from, PointF start, PointF current)
+        public void ReconstructPath(Dictionary<Point, Point> came_from, Point start, Point current)
         {
             LockResult result;
             if (!LockResults.TryGetValue(came_from[current], out result))
@@ -56,14 +62,14 @@ namespace Game.Controllers
             {
                 var prev = came_from[current];
 
-                if (prev.X == current.X + 1)
-                    movelist.Add(Direction.W);
-                else if (prev.X == current.X - 1)
+                if (current == GameState.GetNewPos(prev, Direction.E))
                     movelist.Add(Direction.E);
-                else if (prev.X == current.X + 0.5f)
-                    movelist.Add(Direction.SW);
-                else if (prev.X == current.X - 0.5f)
+                else if (current == GameState.GetNewPos(prev, Direction.W))
+                    movelist.Add(Direction.W);
+                else if (current == GameState.GetNewPos(prev, Direction.SE))
                     movelist.Add(Direction.SE);
+                else if (current == GameState.GetNewPos(prev, Direction.SW))
+                    movelist.Add(Direction.SW);
                 else
                 {
                     throw new Exception();
@@ -76,14 +82,23 @@ namespace Game.Controllers
             result.Directions.Add(movelist);
         }
 
-        public IEnumerable<PointF> GetNeighbors(PointF current)
+        public IEnumerable<UnitState> GetNeighbors(UnitState current)
         {
-            return new List<PointF>
+            return new List<UnitState>
             {
-                new PointF(current.X + 1, current.Y),
-                new PointF(current.X - 1, current.Y),
-                new PointF(current.X + 0.5f, current.Y + 1),
-                new PointF(current.X - 0.5f, current.Y + 1)
+                GetNewState(current, Direction.E),
+                GetNewState(current, Direction.W),
+                GetNewState(current, Direction.SE),
+                GetNewState(current, Direction.SW),
+            };
+        }
+
+        public UnitState GetNewState(UnitState current, Direction direction)
+        {
+            return new UnitState
+            {
+                pos = GameState.GetNewPos(current.pos, direction),
+                Cells = GameState.GetTranslatedPoints(current.Cells, direction)
             };
         }
     }
