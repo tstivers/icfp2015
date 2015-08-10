@@ -9,7 +9,7 @@ namespace Game.Controllers
         public int MinHeight { get; set; }
         public int MaxHeight { get; set; }
         public int MinDistanceFromCenter { get; set; }
-        public int NumberOfHoles { get; set; }
+        public int NumberOfOpenNeighbors { get; set; }
         public List<List<Direction>> Directions { get; set; } = new List<List<Direction>>();
     }
 }

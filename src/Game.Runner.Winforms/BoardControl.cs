@@ -44,7 +44,7 @@ namespace Game.Running.Winforms
                 var board = _gameState.BoardState;
                 for (var col = 0; col < board.Height; col++)
                     for (var row = 0; row < board.Width; row++)
-                        Board.Hexes[col, row].HexState.BackgroundColor = board.Cells[row, col].HasFlag(CellState.Filled)
+                        Board.Hexes[col, row].HexState.BackgroundColor = board.Cells[row, col]
                             ? Color.OrangeRed
                             : DefaultBackColor;
 

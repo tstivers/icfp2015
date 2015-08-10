@@ -19,13 +19,13 @@ namespace Game.Core
     {
         public GameState(Problem problem)
         {
-            Problem = problem;            
+            Problem = problem;
             Reset(0);
         }
 
         public Problem Problem { get; set; }
         public BoardState BoardState { get; set; }
-        public UnitState CurrentUnitState { get; set; }        
+        public UnitState CurrentUnitState { get; set; }
         private LinearCongruentGenerator LCG { get; set; }
         protected Unit CurrentUnit { get; private set; }
         protected Unit NextUnit { get; private set; }
@@ -114,7 +114,7 @@ namespace Game.Core
                 // update board state
                 foreach (var cell in CurrentUnitState.Cells)
                 {
-                    BoardState.Cells[cell.X, cell.Y] = CellState.Filled;
+                    BoardState.Cells[cell.X, cell.Y] = true;
                 }
 
                 // check for removed lines
@@ -123,7 +123,7 @@ namespace Game.Core
                 // calc score
                 var size = CurrentUnit.Members.Length;
                 var score = size + 100*(1 + ls)*ls/2;
-                score += LastLinesCleared > 0 ? (int)Math.Floor((LastLinesCleared - 1.0)*score/10.0) : 0;
+                score += LastLinesCleared > 0 ? (int) Math.Floor((LastLinesCleared - 1.0)*score/10.0) : 0;
                 Score += score;
                 LastLinesCleared = ls;
 
@@ -136,12 +136,7 @@ namespace Game.Core
                 CurrentUnitState = CurrentUnitState.Translate(direction);
             }
             return true;
-        }
-
-        public bool ExecuteMove(char c)
-        {
-            return true;
-        }
+        }     
 
         public bool UnitIsLocked(UnitState state)
         {
@@ -153,7 +148,7 @@ namespace Game.Core
                 if (cell.Y < 0 || cell.Y >= BoardState.Height)
                     return true;
 
-                if (BoardState.Cells[cell.X, cell.Y].HasFlag(CellState.Filled))
+                if (BoardState.Cells[cell.X, cell.Y])
                     return true;
             }
 
@@ -168,7 +163,7 @@ namespace Game.Core
                 var removed = true;
                 for (var j = 0; j < BoardState.Width; j++)
                 {
-                    if (!BoardState.Cells[j, i].HasFlag(CellState.Filled) && !cells.Contains(new Point(j, i)))
+                    if (!BoardState.Cells[j, i] && !cells.Contains(new Point(j, i)))
                     {
                         removed = false;
                         break;
@@ -185,39 +180,40 @@ namespace Game.Core
         public Point[] GetNeighboringPoints(Point cell)
         {
             var points = new Point[6];
-            points[0] = cell.Y % 2 == 1
-                    ? new Point(cell.X + 1, cell.Y + 1)
-                    : new Point(cell.X, cell.Y + 1);
-            points[1] = cell.Y % 2 == 1
-                    ? new Point(cell.X, cell.Y + 1)
-                    : new Point(cell.X - 1, cell.Y + 1);
-            points[2] = new Point(cell.X -1, cell.Y);
+            points[0] = cell.Y%2 == 1
+                ? new Point(cell.X + 1, cell.Y + 1)
+                : new Point(cell.X, cell.Y + 1);
+            points[1] = cell.Y%2 == 1
+                ? new Point(cell.X, cell.Y + 1)
+                : new Point(cell.X - 1, cell.Y + 1);
+            points[2] = new Point(cell.X - 1, cell.Y);
             points[3] = new Point(cell.X + 1, cell.Y);
-            points[4] = cell.Y % 2 == 1
-                    ? new Point(cell.X + 1, cell.Y - 1)
-                    : new Point(cell.X, cell.Y - 1);
-            points[5] = cell.Y % 2 == 1
-                    ? new Point(cell.X, cell.Y - 1)
-                    : new Point(cell.X - 1, cell.Y - 1);
+            points[4] = cell.Y%2 == 1
+                ? new Point(cell.X + 1, cell.Y - 1)
+                : new Point(cell.X, cell.Y - 1);
+            points[5] = cell.Y%2 == 1
+                ? new Point(cell.X, cell.Y - 1)
+                : new Point(cell.X - 1, cell.Y - 1);
 
             return points;
         }
 
-        public int CountNumberOfHoles(Point[] cells)
+        public int CountNumberOfOpenNeighbors(Point[] cells)
         {
-            var holes = 0;
+            var open = 0;
 
             foreach (var cell in cells)
             {
-                foreach (var n in GetNeighboringPoints(cell))
+                foreach (var neighbor in GetNeighboringPoints(cell))
                 {
-                    if (n.X >= 0 && n.X < BoardState.Width && n.Y >= 0 && n.Y < BoardState.Height &&
-                        !BoardState.Cells[n.X, n.Y].HasFlag(CellState.Filled) && !cells.Contains(n))
-                        holes++;
+                    if (neighbor.X >= 0 && neighbor.X < BoardState.Width && neighbor.Y >= 0 &&
+                        neighbor.Y < BoardState.Height &&
+                        !BoardState.Cells[neighbor.X, neighbor.Y] && !cells.Contains(neighbor))
+                        open++;
                 }
             }
 
-            return holes;
+            return open;
         }
     }
 

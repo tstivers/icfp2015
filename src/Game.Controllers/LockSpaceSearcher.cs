@@ -55,7 +55,7 @@ namespace Game.Controllers
                 result.LinesRemoved = GameState.CheckRemovedLines(prevState.Cells, result.MinHeight, result.MaxHeight);
                 result.MinDistanceFromCenter =
                     prevState.Cells.Select(x => Math.Abs((GameState.BoardState.Width/2) - x.X)).Min();
-                result.NumberOfHoles = GameState.CountNumberOfHoles(prevState.Cells);
+                result.NumberOfOpenNeighbors = GameState.CountNumberOfOpenNeighbors(prevState.Cells);
             }
 
             var movelist = new List<Direction>();

@@ -38,9 +38,7 @@ namespace Game.Runner.Commandline
 
             var p = new OptionSet
             {
-                "Usage: icfp2015 [OPTIONS]+",
-                "Greet a list of individuals with an optional message.",
-                "If no message is specified, a generic greeting is used.",
+                "Usage: play_icfp2015.exe [OPTIONS]+",              
                 "",
                 "Options:",
                 {
@@ -98,7 +96,7 @@ namespace Game.Runner.Commandline
                 return;
             }
 
-            if (show_help)
+            if (show_help || files.Count == 0)
             {
                 p.WriteOptionDescriptions(Console.Out);
                 return;

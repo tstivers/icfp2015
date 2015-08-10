@@ -1,23 +1,17 @@
 namespace Game.Core
-{
-    public enum CellState
-    {
-        None = 0,
-        Filled = 1
-    }
-
+{  
     public class BoardState
     {
         public BoardState(Problem problem)
         {
             Problem = problem;
-            Cells = new CellState[problem.Width, problem.Height];
+            Cells = new bool[problem.Width, problem.Height];
 
             foreach (var cell in problem.Filled)
-                Cells[cell.X, cell.Y] = CellState.Filled;
+                Cells[cell.X, cell.Y] = true;
         }
 
-        public CellState[,] Cells { get; }
+        public bool[,] Cells { get; }
         public Problem Problem { get; set; }
         public int Width => Problem.Width;
         public int Height => Problem.Height;
@@ -30,7 +24,7 @@ namespace Game.Core
                 var full = true;
                 for (var col = 0; col < Width; col++)
                 {
-                    full = full && Cells[col, row].HasFlag(CellState.Filled);
+                    full = full && Cells[col, row];
                 }
 
                 if (full)
@@ -45,7 +39,7 @@ namespace Game.Core
                     }
                     for (var ccol = 0; ccol < Width; ccol++)
                     {
-                        Cells[ccol, 0] = CellState.None;
+                        Cells[ccol, 0] = false;
                     }
                     row--;
                 }
