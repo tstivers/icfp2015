@@ -42,7 +42,7 @@ namespace Game.Controllers
 
                         var lowest =
                             lockSpaceSearcher.LockResults.OrderByDescending(x => x.Value.LinesRemoved)
-                                .ThenBy(x => x.Value.NumberOfHoles)
+                                //.ThenBy(x => x.Value.NumberOfHoles)
                                 .ThenByDescending(x => x.Value.MaxHeight)
                                 .ThenByDescending(x => x.Value.MinHeight)
                                 .ThenByDescending(x => x.Value.MinDistanceFromCenter)
