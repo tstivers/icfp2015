@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Controllers", "Game.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Runner.Commandline", "Game.Runner.Commandline\Game.Runner.Commandline.csproj", "{3FE45F48-E102-4F5A-9413-33596D6C1B27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Runner.Winforms", "Game.Running.Winforms\Game.Runner.Winforms.csproj", "{C591EBDA-05D1-4E02-808C-02195E2D953F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Runner.Winforms", "Game.Runner.Winforms\Game.Runner.Winforms.csproj", "{C591EBDA-05D1-4E02-808C-02195E2D953F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Core.Tests", "Game.Core.Tests\Game.Core.Tests.csproj", "{001C410E-4012-4E55-9528-42F90463C8F9}"
 EndProject
