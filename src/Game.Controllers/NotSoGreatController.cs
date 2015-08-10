@@ -42,9 +42,9 @@ namespace Game.Controllers
 
                         var lowest =
                             lockSpaceSearcher.LockResults.OrderByDescending(x => x.Value.LinesRemoved)                                
-                                .ThenByDescending(x => x.Value.MaxHeight)
-                                .ThenBy(x => x.Value.NumberOfHoles)
+                                .ThenByDescending(x => x.Value.MaxHeight)                                
                                 .ThenByDescending(x => x.Value.MinHeight)
+                                .ThenBy(x => x.Value.NumberOfHoles)
                                 .ThenByDescending(x => x.Value.MinDistanceFromCenter)
                                 .First();
                         foreach (var d in lowest.Value.Directions.OrderBy(x => x.Count).First())
