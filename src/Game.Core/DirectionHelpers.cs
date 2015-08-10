@@ -7,7 +7,7 @@ namespace Game.Core
     {
         public static string ToSolutionString(this List<Direction> directions)
         {
-            StringBuilder sb = new StringBuilder(directions.Count);
+            var sb = new StringBuilder(directions.Count);
             foreach (var d in directions)
             {
                 switch (d)

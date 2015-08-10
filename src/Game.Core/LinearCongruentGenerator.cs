@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Game.Core
+﻿namespace Game.Core
 {
     public class LinearCongruentGenerator
     {
@@ -9,7 +7,8 @@ namespace Game.Core
         private readonly long _multiplier;
         private long _state;
 
-        public LinearCongruentGenerator(long seed, long modulus = 4294967296, long multiplier = 1103515245, long increment = 12345)
+        public LinearCongruentGenerator(long seed, long modulus = 4294967296, long multiplier = 1103515245,
+            long increment = 12345)
         {
             _state = seed;
             _modulus = modulus;
@@ -23,7 +22,7 @@ namespace Game.Core
 
             _state = ((_multiplier*_state) + _increment)%_modulus;
 
-            return (int)rand;
+            return (int) rand;
         }
     }
 }

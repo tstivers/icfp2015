@@ -1,133 +1,118 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 
 namespace Hexagonal
 {
-	public class GraphicsEngine
-	{
-		private Hexagonal.Board board;
-		private float boardPixelWidth;
-		private float boardPixelHeight;
-		private int boardXOffset;
-		private int boardYOffset;
-	
-		public GraphicsEngine(Hexagonal.Board board)
-		{
-			this.Initialize(board, 0, 0);
-		}
+    public class GraphicsEngine
+    {
+        private Board board;
+        private float boardPixelHeight;
+        private float boardPixelWidth;
+        private int boardXOffset;
+        private int boardYOffset;
 
-		public GraphicsEngine(Hexagonal.Board board, int xOffset, int yOffset)
-		{
-			this.Initialize(board, xOffset, yOffset);
-		}
+        public GraphicsEngine(Board board)
+        {
+            Initialize(board, 0, 0);
+        }
 
-		public int BoardXOffset
-		{
-			get
-			{
-				return boardXOffset;
-			}
-			set
-			{
-				throw new System.NotImplementedException();
-			}
-		}
+        public GraphicsEngine(Board board, int xOffset, int yOffset)
+        {
+            Initialize(board, xOffset, yOffset);
+        }
 
-		public int BoardYOffset
-		{
-			get
-			{
-				return boardYOffset;
-			}
-			set
-			{
-				throw new System.NotImplementedException();
-			}
-		}
-		
-		private void Initialize(Hexagonal.Board board, int xOffset, int yOffset)
-		{
-			this.board = board;
-			this.boardXOffset = xOffset;
-			this.boardYOffset = yOffset;
-		}
+        public int BoardXOffset
+        {
+            get { return boardXOffset; }
+            set { throw new NotImplementedException(); }
+        }
 
-		public void Draw(Graphics graphics)
-		{ 
-		
-			int width =  Convert.ToInt32(System.Math.Ceiling(board.PixelWidth));
-			int height = Convert.ToInt32(System.Math.Ceiling(board.PixelHeight));
-			// seems to be needed to avoid bottom and right from being chopped off
-			width += 1;
-			height += 1;
+        public int BoardYOffset
+        {
+            get { return boardYOffset; }
+            set { throw new NotImplementedException(); }
+        }
 
-			//
-			// Create drawing objects
-			//
-			Bitmap bitmap = new Bitmap(width, height);
-			Graphics bitmapGraphics = Graphics.FromImage(bitmap);
-			Pen p = new Pen(Color.Black);
-			SolidBrush sb = new SolidBrush(Color.Black);
+        private void Initialize(Board board, int xOffset, int yOffset)
+        {
+            this.board = board;
+            boardXOffset = xOffset;
+            boardYOffset = yOffset;
+        }
 
-			
-			//
-			// Draw Board background
-			//
-			sb = new SolidBrush(board.BoardState.BackgroundColor);
-			bitmapGraphics.FillRectangle(sb, 0, 0, width, height);
+        public void Draw(Graphics graphics)
+        {
+            var width = Convert.ToInt32(System.Math.Ceiling(board.PixelWidth));
+            var height = Convert.ToInt32(System.Math.Ceiling(board.PixelHeight));
+            // seems to be needed to avoid bottom and right from being chopped off
+            width += 1;
+            height += 1;
 
-			//
-			// Draw Hex Background 
-			//
-			for (int i = 0; i < board.Hexes.GetLength(0); i++)
-			{
-				for (int j = 0; j < board.Hexes.GetLength(1); j++)
-				{
-					//bitmapGraphics.DrawPolygon(p, board.Hexes[i, j].Points);
-					bitmapGraphics.FillPolygon(new SolidBrush(board.Hexes[i,j].HexState.BackgroundColor), board.Hexes[i, j].Points);
-				}
-			}
+            //
+            // Create drawing objects
+            //
+            var bitmap = new Bitmap(width, height);
+            var bitmapGraphics = Graphics.FromImage(bitmap);
+            var p = new Pen(Color.Black);
+            var sb = new SolidBrush(Color.Black);
 
-			
-			//
-			// Draw Hex Grid
-			//
-			p.Color = board.BoardState.GridColor;
-			p.Width = board.BoardState.GridPenWidth;
-			for (int i = 0; i < board.Hexes.GetLength(0); i++)
-			{
-				for (int j = 0; j < board.Hexes.GetLength(1); j++)
-				{
-					bitmapGraphics.DrawPolygon(p, board.Hexes[i, j].Points);
-				}
-			}
 
-			//
-			// Draw Active Hex, if present
-			//
-			if (board.BoardState.ActiveHex != null)
-			{
-				sb = new SolidBrush(board.BoardState.ActiveHexBorderColor);
-				p.Width = board.BoardState.ActiveHexBorderWidth;
-				//bitmapGraphics.DrawPolygon(p, board.BoardState.ActiveHex.Points);
-                bitmapGraphics.FillEllipse(sb, new RectangleF(board.BoardState.ActiveHex.CenterPoint.X - 2, board.BoardState.ActiveHex.CenterPoint.Y - 2, 4, 4));
-			}
+            //
+            // Draw Board background
+            //
+            sb = new SolidBrush(board.BoardState.BackgroundColor);
+            bitmapGraphics.FillRectangle(sb, 0, 0, width, height);
 
-			//
-			// Draw internal bitmap to screen
-			//
-			graphics.DrawImage(bitmap, new Point(this.boardXOffset , this.boardYOffset));
-			
-			//
-			// Release objects
-			//
-			bitmapGraphics.Dispose();
-			bitmap.Dispose();
+            //
+            // Draw Hex Background 
+            //
+            for (var i = 0; i < board.Hexes.GetLength(0); i++)
+            {
+                for (var j = 0; j < board.Hexes.GetLength(1); j++)
+                {
+                    //bitmapGraphics.DrawPolygon(p, board.Hexes[i, j].Points);
+                    bitmapGraphics.FillPolygon(new SolidBrush(board.Hexes[i, j].HexState.BackgroundColor),
+                        board.Hexes[i, j].Points);
+                }
+            }
 
-		}
 
-	}
+            //
+            // Draw Hex Grid
+            //
+            p.Color = board.BoardState.GridColor;
+            p.Width = board.BoardState.GridPenWidth;
+            for (var i = 0; i < board.Hexes.GetLength(0); i++)
+            {
+                for (var j = 0; j < board.Hexes.GetLength(1); j++)
+                {
+                    bitmapGraphics.DrawPolygon(p, board.Hexes[i, j].Points);
+                }
+            }
+
+            //
+            // Draw Active Hex, if present
+            //
+            if (board.BoardState.ActiveHex != null)
+            {
+                sb = new SolidBrush(board.BoardState.ActiveHexBorderColor);
+                p.Width = board.BoardState.ActiveHexBorderWidth;
+                //bitmapGraphics.DrawPolygon(p, board.BoardState.ActiveHex.Points);
+                bitmapGraphics.FillEllipse(sb,
+                    new RectangleF(board.BoardState.ActiveHex.CenterPoint.X - 2,
+                        board.BoardState.ActiveHex.CenterPoint.Y - 2, 4, 4));
+            }
+
+            //
+            // Draw internal bitmap to screen
+            //
+            graphics.DrawImage(bitmap, new Point(boardXOffset, boardYOffset));
+
+            //
+            // Release objects
+            //
+            bitmapGraphics.Dispose();
+            bitmap.Dispose();
+        }
+    }
 }

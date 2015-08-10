@@ -1,102 +1,33 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 
 namespace Hexagonal
 {
-	public class BoardState
-	{
-		private System.Drawing.Color backgroundColor;
-		private System.Drawing.Color gridColor;
-		private int gridPenWidth;
-		private Hexagonal.Hex activeHex;
-		private System.Drawing.Color activeHexBorderColor;
-		private int activeHexBorderWidth;
+    public class BoardState
+    {
+        public BoardState()
+        {
+            BackgroundColor = Color.White;
+            GridColor = Color.Black;
+            GridPenWidth = 1;
+            ActiveHex = null;
+            ActiveHexBorderColor = Color.Blue;
+            ActiveHexBorderWidth = 1;
+        }
 
-		#region Properties
+        #region Properties
 
-		public System.Drawing.Color BackgroundColor
-		{
-			get
-			{
-				return backgroundColor;
-			}
-			set
-			{
-				backgroundColor = value;
-			}
-		}
+        public Color BackgroundColor { get; set; }
 
-		public System.Drawing.Color GridColor
-		{
-			get
-			{
-				return gridColor;
-			}
-			set
-			{
-				gridColor = value;
-			}
-		}
+        public Color GridColor { get; set; }
 
-		public int GridPenWidth
-		{
-			get
-			{
-				return gridPenWidth;
-			}
-			set
-			{
-				gridPenWidth = value;
-			}
-		}
+        public int GridPenWidth { get; set; }
 
-		public Hexagonal.Hex ActiveHex
-		{
-			get
-			{
-				return activeHex;
-			}
-			set
-			{
-				activeHex = value;
-			}
-		}
+        public Hex ActiveHex { get; set; }
 
-		public System.Drawing.Color ActiveHexBorderColor
-		{
-			get
-			{
-				return activeHexBorderColor;
-			}
-			set
-			{
-				activeHexBorderColor = value;
-			}
-		}
+        public Color ActiveHexBorderColor { get; set; }
 
-		public int ActiveHexBorderWidth
-		{
-			get
-			{
-				return activeHexBorderWidth;
-			}
-			set
-			{
-				activeHexBorderWidth = value;
-			}
-		}
-		#endregion
+        public int ActiveHexBorderWidth { get; set; }
 
-		public BoardState()
-		{
-			backgroundColor = Color.White;
-			gridColor = Color.Black;
-			gridPenWidth = 1;
-			activeHex = null;
-			activeHexBorderColor = Color.Blue;
-			activeHexBorderWidth = 1;
-		}
-	}
+        #endregion
+    }
 }

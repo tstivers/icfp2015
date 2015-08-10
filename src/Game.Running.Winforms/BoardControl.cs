@@ -2,7 +2,6 @@
 using System.Windows.Forms;
 using Game.Core;
 using Hexagonal;
-using Board = Hexagonal.Board;
 
 namespace Game.Running.Winforms
 {
@@ -30,16 +29,16 @@ namespace Game.Running.Winforms
             get
             {
                 var parms = base.CreateParams;
-                parms.Style &= ~0x02000000;  // Turn off WS_CLIPCHILDREN
+                parms.Style &= ~0x02000000; // Turn off WS_CLIPCHILDREN
                 return parms;
             }
         }
 
         public Board Board { get; set; }
-        public GraphicsEngine GraphicsEngine { get; set; }        
+        public GraphicsEngine GraphicsEngine { get; set; }
 
         protected override void OnPaint(PaintEventArgs pe)
-        {            
+        {
             if (_gameState != null)
             {
                 var board = _gameState.BoardState;
@@ -52,17 +51,18 @@ namespace Game.Running.Winforms
                 if (_gameState.CurrentUnitState != null)
                 {
                     foreach (var cell in _gameState.CurrentUnitState.Cells)
-                    {                        
+                    {
                         Board.Hexes[cell.Y, cell.X]
                             .HexState.BackgroundColor = Color.Aqua;
                     }
 
                     var pivot = _gameState.CurrentUnitState.Position.Location;
 
-                    if (pivot.X >= 0 && pivot.X < _gameState.BoardState.Width && pivot.Y >= 0 && pivot.Y < _gameState.BoardState.Height)
+                    if (pivot.X >= 0 && pivot.X < _gameState.BoardState.Width && pivot.Y >= 0 &&
+                        pivot.Y < _gameState.BoardState.Height)
                         Board.BoardState.ActiveHex = Board.Hexes[pivot.Y, pivot.X];
-                    else                    
-                        Board.BoardState.ActiveHex = null;                    
+                    else
+                        Board.BoardState.ActiveHex = null;
                 }
 
                 GraphicsEngine?.Draw(pe.Graphics);

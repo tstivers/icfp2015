@@ -43,7 +43,7 @@ namespace Game.Running.Winforms
                     RefreshGameState();
                     Application.DoEvents();
                 };
-            }            
+            }
         }
 
         public void RefreshGameState()

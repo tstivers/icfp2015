@@ -14,8 +14,8 @@ namespace Game.Runner.Commandline
     {
         public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> source, Func<T, string> selector)
         {
-            int max = source
-                .SelectMany(i => Regex.Matches(selector(i), @"\d+").Cast<Match>().Select(m => (int?)m.Value.Length))
+            var max = source
+                .SelectMany(i => Regex.Matches(selector(i), @"\d+").Cast<Match>().Select(m => (int?) m.Value.Length))
                 .Max() ?? 0;
 
             return source.OrderBy(i => Regex.Replace(selector(i), @"\d+", m => m.Value.PadLeft(max, '0')));
@@ -24,8 +24,6 @@ namespace Game.Runner.Commandline
 
     internal class Program
     {
-       
-
         private static void Main(string[] args)
         {
             var files = new List<string>();
@@ -55,7 +53,9 @@ namespace Game.Runner.Commandline
                             files.Add(v);
                         else
                         {
-                            files.AddRange(Directory.GetFiles(Path.GetDirectoryName(v), Path.GetFileName(v)).OrderByAlphaNumeric(x => x.ToString()));
+                            files.AddRange(
+                                Directory.GetFiles(Path.GetDirectoryName(v), Path.GetFileName(v))
+                                    .OrderByAlphaNumeric(x => x.ToString()));
                         }
                     }
                 },
@@ -114,10 +114,7 @@ namespace Game.Runner.Commandline
                 var problem = Problem.FromFile(file);
                 var controller = new NotSoGreatController(problem);
                 var scores = new List<int>();
-                controller.OnGameOver += state =>
-                {             
-                    scores.Add(state.Score);
-                };
+                controller.OnGameOver += state => { scores.Add(state.Score); };
 
                 ProgressBar progress = null;
                 if (verbose)
@@ -140,7 +137,6 @@ namespace Game.Runner.Commandline
                 Console.Error.WriteLine("Total Score: {0}", totalScore);
 
             Console.Write(JsonConvert.SerializeObject(outputs));
-            
-        }       
+        }
     }
 }

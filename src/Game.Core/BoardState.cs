@@ -8,13 +8,6 @@ namespace Game.Core
 
     public class BoardState
     {
-        public CellState[,] Cells { get; }
-        public Problem Problem { get; set; }
-
-
-        public int Width => Problem.Width;
-        public int Height => Problem.Height;
-
         public BoardState(Problem problem)
         {
             Problem = problem;
@@ -24,28 +17,33 @@ namespace Game.Core
                 Cells[cell.X, cell.Y] = CellState.Filled;
         }
 
+        public CellState[,] Cells { get; }
+        public Problem Problem { get; set; }
+        public int Width => Problem.Width;
+        public int Height => Problem.Height;
+
         public int RemoveFullLines()
         {
-            int removed = 0;
-            for (int row = 0; row < Height; row++)
+            var removed = 0;
+            for (var row = 0; row < Height; row++)
             {
                 var full = true;
-                for (int col = 0; col < Width; col++)
+                for (var col = 0; col < Width; col++)
                 {
                     full = full && Cells[col, row].HasFlag(CellState.Filled);
                 }
 
                 if (full)
                 {
-                    removed++;                    
-                    for (int crow = row; crow > 0; crow--)
+                    removed++;
+                    for (var crow = row; crow > 0; crow--)
                     {
-                        for (int ccol = 0; ccol < Width; ccol++)
+                        for (var ccol = 0; ccol < Width; ccol++)
                         {
                             Cells[ccol, crow] = Cells[ccol, crow - 1];
                         }
                     }
-                    for (int ccol = 0; ccol < Width; ccol++)
+                    for (var ccol = 0; ccol < Width; ccol++)
                     {
                         Cells[ccol, 0] = CellState.None;
                     }

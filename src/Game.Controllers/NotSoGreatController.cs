@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using Game.Core;
 
@@ -10,22 +9,21 @@ namespace Game.Controllers
     {
         public delegate void ProgressCallback(GameState state);
 
-        public ProgressCallback OnSolveStarted { get; set; }
-        public ProgressCallback OnMove { get; set; }
-        public ProgressCallback OnLock { get; set; }
-        public ProgressCallback OnGameOver { get; set; }
-        public ProgressCallback OnProblemSolved { get; set; }
-
-        public GameState GameState { get; set; }
-
         public NotSoGreatController(Problem problem)
         {
             GameState = new GameState(problem, null);
         }
 
+        public ProgressCallback OnSolveStarted { get; set; }
+        public ProgressCallback OnMove { get; set; }
+        public ProgressCallback OnLock { get; set; }
+        public ProgressCallback OnGameOver { get; set; }
+        public ProgressCallback OnProblemSolved { get; set; }
+        public GameState GameState { get; set; }
+
         public List<Output> Solve()
         {
-            var outputs = new List<Output>();            
+            var outputs = new List<Output>();
 
             OnSolveStarted?.Invoke(GameState);
 
@@ -42,7 +40,7 @@ namespace Game.Controllers
 
                         var lowest =
                             lockSpaceSearcher.LockResults.OrderByDescending(x => x.Value.LinesRemoved)
-                                .ThenByDescending(x => x.Value.MinHeight)                                
+                                .ThenByDescending(x => x.Value.MinHeight)
                                 .ThenBy(x => x.Value.NumberOfHoles)
                                 .ThenByDescending(x => x.Value.MaxHeight)
                                 .ThenByDescending(x => x.Value.MinDistanceFromCenter)

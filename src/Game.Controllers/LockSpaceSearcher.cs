@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Game.Core;
 
@@ -49,7 +48,7 @@ namespace Game.Controllers
             if (!LockResults.TryGetValue(came_from[currentPosition].Position, out result))
             {
                 result = new LockResult();
-                var prevState = came_from[currentPosition];                
+                var prevState = came_from[currentPosition];
                 LockResults[prevState.Position] = result;
                 result.MaxHeight = prevState.Cells.OrderByDescending(x => x.Y).First().Y;
                 result.MinHeight = prevState.Cells.OrderBy(x => x.Y).First().Y;
@@ -98,7 +97,7 @@ namespace Game.Controllers
                 current.Translate(Direction.SE),
                 current.Translate(Direction.SW),
                 current.Translate(Direction.CW),
-                current.Translate(Direction.CCW),
+                current.Translate(Direction.CCW)
             };
         }
     }
