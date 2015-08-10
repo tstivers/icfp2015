@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="LockResult.cs" />
     <Compile Include="LockSpaceSearcher.cs" />
+    <Compile Include="NotSoGreatController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -85,7 +85,7 @@ namespace Game.Core
 
             var unitWidth = 1 + (max.X - min.X);
 
-            var x = (BoardState.Width/2) - (unitWidth/2) - min.X;
+            var x = (int)Math.Floor(BoardState.Width / 2.0 - unitWidth / 2.0) - min.X;
             var y = 0 - min.Y;
             var pos = new Point(x, y);
 

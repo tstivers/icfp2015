@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
 using Game.Controllers;
 using Game.Core;
@@ -21,26 +18,32 @@ namespace Game.Running.Winforms
         {
             get
             {
-                CreateParams cp = base.CreateParams;
-                cp.ExStyle |= 0x02000000;  // Turn on WS_EX_COMPOSITED
+                var cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000; // Turn on WS_EX_COMPOSITED
                 return cp;
             }
         }
 
+        public NotSoGreatController Controller { get; set; }
         public GameState CurrentGameState { get; set; }
-        public LockSpaceSearcher LockSpaceSearcher { get; set; }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 var problem = Problem.FromFile(openFileDialog1.FileName);
-                CurrentGameState = new GameState(problem, null);
-                boardControl1.GameState = CurrentGameState;
+                Controller = new NotSoGreatController(problem);
+                CurrentGameState = Controller.GameState;
+                boardControl1.GameState = Controller.GameState;
                 Text = openFileDialog1.FileName;
 
                 RefreshGameState();
-            }
+                Controller.OnMove += state =>
+                {
+                    RefreshGameState();
+                    Application.DoEvents();
+                };
+            }            
         }
 
         public void RefreshGameState()
@@ -82,48 +85,7 @@ namespace Game.Running.Winforms
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var outputs = new List<Output>();
-            for (var i = 0; i < CurrentGameState.Problem.SourceSeeds.Length; i++)
-            {
-                CurrentGameState.Reset(i);
-                try
-                {
-                    while (true)
-                    {
-                        LockSpaceSearcher = new LockSpaceSearcher();
-                        LockSpaceSearcher.GameState = CurrentGameState;
-                        LockSpaceSearcher.GenerateLockResults();
-
-                        var lowest =
-                            LockSpaceSearcher.LockResults.OrderByDescending(x => x.Value.LinesRemoved)
-                            //.ThenBy(x => x.Value.NumberOfHoles)
-                                .ThenByDescending(x => x.Value.MaxHeight)                                
-                                .ThenByDescending(x => x.Value.MinHeight)            
-                                                    
-                                .ThenByDescending(x => x.Value.MinDistanceFromCenter)                                
-                                .First();
-                        foreach (var d in lowest.Value.Directions.OrderBy(x => x.Count).First())
-                        {
-                            CurrentGameState.ExecuteMove(d);
-                            //RefreshGameState();
-                            Application.DoEvents();
-                            //Thread.Sleep(100);
-                        }
-                        //Thread.Sleep(300);
-                        RefreshGameState();
-                    }
-                }
-                catch (GameOverException)
-                {
-                    outputs.Add(new Output
-                    {
-                        problemId = CurrentGameState.Problem.Id,
-                        seed = CurrentGameState.Problem.SourceSeeds[i],
-                        tag = string.Format("score_" + CurrentGameState.Score + "_" + CurrentGameState.Problem.SourceSeeds[i]),
-                        solution = CurrentGameState.Moves.ToSolutionString()
-                    });
-                }
-            }
+            var outputs = Controller.Solve();
 
             File.WriteAllText("out.json", JsonConvert.SerializeObject(outputs));
             SolutionBox.Text = "";
