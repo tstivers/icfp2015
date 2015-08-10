@@ -25,12 +25,21 @@ namespace Game.Running.Winforms
             }
         }
 
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var parms = base.CreateParams;
+                parms.Style &= ~0x02000000;  // Turn off WS_CLIPCHILDREN
+                return parms;
+            }
+        }
+
         public Board Board { get; set; }
-        public GraphicsEngine GraphicsEngine { get; set; }
+        public GraphicsEngine GraphicsEngine { get; set; }        
 
         protected override void OnPaint(PaintEventArgs pe)
-        {
-            base.OnPaint(pe);
+        {            
             if (_gameState != null)
             {
                 var board = _gameState.BoardState;
@@ -40,13 +49,20 @@ namespace Game.Running.Winforms
                             ? Color.OrangeRed
                             : DefaultBackColor;
 
-                if (_gameState.CurrentUnitCells != null)
+                if (_gameState.CurrentUnitState != null)
                 {
-                    foreach (var cell in _gameState.CurrentUnitCells)
+                    foreach (var cell in _gameState.CurrentUnitState.Cells)
                     {                        
                         Board.Hexes[cell.Y, cell.X]
                             .HexState.BackgroundColor = Color.Aqua;
                     }
+
+                    var pivot = _gameState.CurrentUnitState.Position.Location;
+
+                    if (pivot.X >= 0 && pivot.X < _gameState.BoardState.Width && pivot.Y >= 0 && pivot.Y < _gameState.BoardState.Height)
+                        Board.BoardState.ActiveHex = Board.Hexes[pivot.Y, pivot.X];
+                    else                    
+                        Board.BoardState.ActiveHex = null;                    
                 }
 
                 GraphicsEngine?.Draw(pe.Graphics);
@@ -55,7 +71,7 @@ namespace Game.Running.Winforms
 
         public void ResetGameState()
         {
-            Board = new Board(_gameState.Problem.Width, _gameState.Problem.Height, 5, HexOrientation.Pointy);
+            Board = new Board(_gameState.Problem.Width, _gameState.Problem.Height, 15, HexOrientation.Pointy);
             GraphicsEngine = new GraphicsEngine(Board);
             Refresh();
         }

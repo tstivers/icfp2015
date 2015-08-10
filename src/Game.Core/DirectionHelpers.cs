@@ -24,6 +24,12 @@ namespace Game.Core
                     case Direction.W:
                         sb.Append('p');
                         break;
+                    case Direction.CW:
+                        sb.Append('d');
+                        break;
+                    case Direction.CCW:
+                        sb.Append('k');
+                        break;
                 }
             }
 
@@ -68,6 +74,22 @@ namespace Game.Core
                     case ' ':
                     case '5':
                         directions.Add(Direction.SE);
+                        break;
+                    case 'd':
+                    case 'q':
+                    case 'r':
+                    case 'v':
+                    case 'z':
+                    case '1':
+                        directions.Add(Direction.CW);
+                        break;
+                    case 'k':
+                    case 's':
+                    case 't':
+                    case 'u':
+                    case 'w':
+                    case 'x':
+                        directions.Add(Direction.CCW);
                         break;
                 }
             }

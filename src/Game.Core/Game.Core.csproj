@@ -52,6 +52,7 @@
     <Compile Include="Cell.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="Output.cs" />
+    <Compile Include="Position.cs" />
     <Compile Include="Problem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Unit.cs" />

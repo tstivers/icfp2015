@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Game.Core
 {
@@ -9,7 +11,9 @@ namespace Game.Core
         E,
         W,
         SE,
-        SW
+        SW,
+        CW,
+        CCW
     }
 
     public class GameState
@@ -23,12 +27,11 @@ namespace Game.Core
 
         public Problem Problem { get; set; }
         public BoardState BoardState { get; set; }
+        public UnitState CurrentUnitState { get; set; }
         public IController Controller { get; set; }
         private LinearCongruentGenerator LCG { get; set; }
         protected Unit CurrentUnit { get; private set; }
         protected Unit NextUnit { get; private set; }
-        public Point CurrentUnitPosition { get; set; }
-        public Point[] CurrentUnitCells { get; set; }
         public int UnitsLeft { get; private set; }
         public int Score { get; private set; }
         public List<Direction> Moves { get; } = new List<Direction>();
@@ -57,11 +60,18 @@ namespace Game.Core
             }
 
             // calc starting position for unit
-            CurrentUnitPosition = CalcStartingPosition(CurrentUnit);
+            CurrentUnitState = CalcStartingPosition(CurrentUnit);
+
+            if (UnitIsLocked(CurrentUnitState))
+            {
+                CurrentUnit = null;
+                CurrentUnitState = null;
+                throw new GameOverException();
+            }
         }
 
-        public Point CalcStartingPosition(Unit unit)
-        {
+        public UnitState CalcStartingPosition(Unit unit)
+        {            
             var max = new Cell();
             var min = new Cell(int.MaxValue, int.MaxValue);
 
@@ -75,72 +85,26 @@ namespace Game.Core
 
             var unitWidth = 1 + (max.X - min.X);
 
-            var x = (int) Math.Floor(BoardState.Width/2.0 - unitWidth/2.0);
+            var x = (BoardState.Width/2) - (unitWidth/2) - min.X;
             var y = 0 - min.Y;
             var pos = new Point(x, y);
 
-            CurrentUnitCells = new Point[unit.Members.Length];
+            var cells = new Point[unit.Members.Length];
             for (int i = 0; i < unit.Members.Length; i++)            
-                CurrentUnitCells[i] = new Point(unit.Members[i].X + pos.X, unit.Members[i].Y + pos.Y);            
+                cells[i] = new Point(unit.Members[i].X + pos.X, unit.Members[i].Y + pos.Y);            
 
-            if (BoardIsLocked())
-            {
-                CurrentUnit = null;
-                CurrentUnitCells = null;
-                throw new GameOverException();
-            }
 
-            return pos;
+            var position = new Position(new Point(CurrentUnit.Pivot.X + pos.X, CurrentUnit.Pivot.Y + pos.Y), 0);
+
+            var state = new UnitState(position, cells);
+
+            return state;
         }
 
         public bool MoveWillLock(Direction direction)
-        {            
-            var newCells = GetTranslatedPoints(CurrentUnitCells, direction);
-
-            foreach (var cell in newCells)
-            {
-                if (cell.X < 0 || cell.X >= BoardState.Width)
-                    return true;
-
-                if (cell.Y < 0 || cell.Y >= BoardState.Height)
-                    return true;
-
-                if (BoardState.Cells[cell.X, cell.Y].HasFlag(CellState.Filled))
-                    return true;
-            }
-
-            return false;
-        }
-
-        public Point[] GetTranslatedPoints(Point[] points, Direction direction)
         {
-            var translated = new Point[points.Length];
-            for (int i = 0; i < points.Length; i++)
-                translated[i] = GetNewPos(points[i], direction);
-
-            return translated;
-        }
-
-        public static Point GetNewPos(Point current, Direction direction)
-        {
-            switch (direction)
-            {
-                case Direction.E:
-                    return new Point(current.X + 1, current.Y);
-                case Direction.SE:
-                    return current.Y%2 == 1
-                        ? new Point(current.X + 1, current.Y + 1)
-                        : new Point(current.X, current.Y + 1);
-                case Direction.SW:
-                    return current.Y%2 == 1
-                        ? new Point(current.X, current.Y + 1)
-                        : new Point(current.X - 1, current.Y + 1);
-                case Direction.W:
-                    return new Point(current.X - 1, current.Y);
-                default:
-                    throw new ArgumentException();
-            }
-        }
+            return UnitIsLocked(CurrentUnitState.Translate(direction));
+        }       
 
         public bool ExecuteMove(Direction direction)
         {
@@ -150,7 +114,7 @@ namespace Game.Core
             if (MoveWillLock(direction))
             {
                 // update board state
-                foreach (var cell in CurrentUnitCells)
+                foreach (var cell in CurrentUnitState.Cells)
                 {
                     BoardState.Cells[cell.X, cell.Y] = CellState.Filled;
                 }
@@ -169,8 +133,7 @@ namespace Game.Core
             }
             else
             {
-                CurrentUnitPosition = GetNewPos(CurrentUnitPosition, direction);
-                CurrentUnitCells = GetTranslatedPoints(CurrentUnitCells, direction);
+                CurrentUnitState = CurrentUnitState.Translate(direction);                
             }
             return true;
         }
@@ -180,14 +143,9 @@ namespace Game.Core
             return true;
         }
 
-        public bool BoardIsLocked()
+        public bool UnitIsLocked(UnitState state)
         {
-            return CellsAreLocked(CurrentUnitCells);
-        }
-
-        public bool CellsAreLocked(Point[] cells)
-        {
-            foreach (var cell in cells)
+            foreach (var cell in state.Cells)
             {
                 if (cell.X < 0 || cell.X >= BoardState.Width)
                     return true;
@@ -200,6 +158,51 @@ namespace Game.Core
             }
 
             return false;
+        }
+
+        public int CheckRemovedLines(Point[] cells, int minHeight, int maxHeight)
+        {
+            int removedLines = 0;
+            for (int i = minHeight; i <= maxHeight; i++)
+            {
+                bool removed = true;
+                for (int j = 0; j < BoardState.Width; j++)
+                {
+                    if (!BoardState.Cells[j, i].HasFlag(CellState.Filled) && !cells.Contains(new Point(j, i)))
+                    {
+                        removed = false;
+                        break;
+                    }
+                }
+
+                if (removed)
+                    removedLines++;
+            }
+
+            return removedLines;
+        }
+
+        public int CountNumberOfHoles(Point[] cells)
+        {
+            var holes = 0;
+
+            foreach (var cell in cells)
+            {
+                var se = cell.Y % 2 == 1
+                            ? new Point(cell.X + 1, cell.Y + 1)
+                            : new Point(cell.X, cell.Y + 1);
+                var sw = cell.Y % 2 == 1
+                            ? new Point(cell.X, cell.Y + 1)
+                            : new Point(cell.X - 1, cell.Y + 1);
+
+                if (se.X >= 0 && se.X < BoardState.Width && se.Y >= 0 && se.Y < BoardState.Height && !BoardState.Cells[se.X, se.Y].HasFlag(CellState.Filled) && !cells.Contains(se))
+                    holes++;
+
+                if (sw.X >= 0 && sw.X < BoardState.Width && sw.Y >= 0 && sw.Y < BoardState.Height && !BoardState.Cells[sw.X, sw.Y].HasFlag(CellState.Filled) && !cells.Contains(sw))
+                    holes++;
+            }
+
+            return holes;
         }
     }
 

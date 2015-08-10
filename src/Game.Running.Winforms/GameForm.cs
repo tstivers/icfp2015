@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using Game.Controllers;
 using Game.Core;
@@ -16,6 +17,16 @@ namespace Game.Running.Winforms
             InitializeComponent();
         }
 
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000;  // Turn on WS_EX_COMPOSITED
+                return cp;
+            }
+        }
+
         public GameState CurrentGameState { get; set; }
         public LockSpaceSearcher LockSpaceSearcher { get; set; }
 
@@ -26,8 +37,8 @@ namespace Game.Running.Winforms
                 var problem = Problem.FromFile(openFileDialog1.FileName);
                 CurrentGameState = new GameState(problem, null);
                 boardControl1.GameState = CurrentGameState;
-                this.Text = openFileDialog1.FileName;
-                
+                Text = openFileDialog1.FileName;
+
                 RefreshGameState();
             }
         }
@@ -72,7 +83,7 @@ namespace Game.Running.Winforms
         private void button2_Click(object sender, EventArgs e)
         {
             var outputs = new List<Output>();
-            for (int i = 0; i < CurrentGameState.Problem.SourceSeeds.Length; i++)
+            for (var i = 0; i < CurrentGameState.Problem.SourceSeeds.Length; i++)
             {
                 CurrentGameState.Reset(i);
                 try
@@ -83,12 +94,23 @@ namespace Game.Running.Winforms
                         LockSpaceSearcher.GameState = CurrentGameState;
                         LockSpaceSearcher.GenerateLockResults();
 
-                        var lowest = LockSpaceSearcher.LockResults.OrderBy(x => -x.Key.Y).First();
-                        foreach (var d in lowest.Value.Directions[0])
+                        var lowest =
+                            LockSpaceSearcher.LockResults.OrderByDescending(x => x.Value.LinesRemoved)
+                            //.ThenBy(x => x.Value.NumberOfHoles)
+                                .ThenByDescending(x => x.Value.MaxHeight)                                
+                                .ThenByDescending(x => x.Value.MinHeight)            
+                                                    
+                                .ThenByDescending(x => x.Value.MinDistanceFromCenter)                                
+                                .First();
+                        foreach (var d in lowest.Value.Directions.OrderBy(x => x.Count).First())
                         {
                             CurrentGameState.ExecuteMove(d);
+                            //RefreshGameState();
+                            Application.DoEvents();
+                            //Thread.Sleep(100);
                         }
-
+                        //Thread.Sleep(300);
+                        RefreshGameState();
                     }
                 }
                 catch (GameOverException)
@@ -97,15 +119,19 @@ namespace Game.Running.Winforms
                     {
                         problemId = CurrentGameState.Problem.Id,
                         seed = CurrentGameState.Problem.SourceSeeds[i],
-                        tag = string.Format("score_" + CurrentGameState.Score),
+                        tag = string.Format("score_" + CurrentGameState.Score + "_" + CurrentGameState.Problem.SourceSeeds[i]),
                         solution = CurrentGameState.Moves.ToSolutionString()
                     });
                 }
-
             }
 
             File.WriteAllText("out.json", JsonConvert.SerializeObject(outputs));
-            SolutionBox.Text = CurrentGameState.Moves.ToSolutionString();
+            SolutionBox.Text = "";
+            foreach (var o in outputs)
+            {
+                SolutionBox.Text += o.tag + "\n";
+            }
+            //SolutionBox.Text = CurrentGameState.Moves.ToSolutionString();
         }
 
         private void SolutionBox_TextChanged(object sender, EventArgs e)
@@ -117,14 +143,13 @@ namespace Game.Running.Winforms
             {
                 foreach (var direction in directions)
                 {
-                    CurrentGameState.ExecuteMove(direction);                    
+                    CurrentGameState.ExecuteMove(direction);
                 }
             }
             catch (GameOverException)
-            {                
+            {
             }
             RefreshGameState();
-
         }
 
         private void SolutionBox_SelectionChanged(object sender, EventArgs e)
@@ -136,12 +161,24 @@ namespace Game.Running.Winforms
             {
                 foreach (var direction in directions)
                 {
-                    CurrentGameState.ExecuteMove(direction);                    
+                    CurrentGameState.ExecuteMove(direction);
                 }
             }
             catch (GameOverException)
-            {                
+            {
             }
+            RefreshGameState();
+        }
+
+        private void CWButton_Click(object sender, EventArgs e)
+        {
+            CurrentGameState.ExecuteMove(Direction.CW);
+            RefreshGameState();
+        }
+
+        private void CCWButton_Click(object sender, EventArgs e)
+        {
+            CurrentGameState.ExecuteMove(Direction.CCW);
             RefreshGameState();
         }
     }
