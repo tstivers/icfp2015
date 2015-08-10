@@ -11,7 +11,7 @@ namespace Game.Controllers
 
         public NotSoGreatController(Problem problem)
         {
-            GameState = new GameState(problem, null);
+            GameState = new GameState(problem);
         }
 
         public ProgressCallback OnSolveStarted { get; set; }

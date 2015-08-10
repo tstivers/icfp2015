@@ -17,23 +17,22 @@ namespace Game.Core
 
     public class GameState
     {
-        public GameState(Problem problem, IController controller)
+        public GameState(Problem problem)
         {
-            Problem = problem;
-            Controller = controller;
+            Problem = problem;            
             Reset(0);
         }
 
         public Problem Problem { get; set; }
         public BoardState BoardState { get; set; }
-        public UnitState CurrentUnitState { get; set; }
-        public IController Controller { get; set; }
+        public UnitState CurrentUnitState { get; set; }        
         private LinearCongruentGenerator LCG { get; set; }
         protected Unit CurrentUnit { get; private set; }
         protected Unit NextUnit { get; private set; }
         public int UnitsLeft { get; private set; }
         public int Score { get; private set; }
         public List<Direction> Moves { get; } = new List<Direction>();
+        public int LastLinesCleared { get; set; }
 
         public void Reset(int gameNumber)
         {
@@ -124,7 +123,9 @@ namespace Game.Core
                 // calc score
                 var size = CurrentUnit.Members.Length;
                 var score = size + 100*(1 + ls)*ls/2;
+                score += LastLinesCleared > 0 ? (int)Math.Floor((LastLinesCleared - 1.0)*score/10.0) : 0;
                 Score += score;
+                LastLinesCleared = ls;
 
                 // validate game state
                 // spawn next piece                 
@@ -181,26 +182,39 @@ namespace Game.Core
             return removedLines;
         }
 
+        public Point[] GetNeighboringPoints(Point cell)
+        {
+            var points = new Point[6];
+            points[0] = cell.Y % 2 == 1
+                    ? new Point(cell.X + 1, cell.Y + 1)
+                    : new Point(cell.X, cell.Y + 1);
+            points[1] = cell.Y % 2 == 1
+                    ? new Point(cell.X, cell.Y + 1)
+                    : new Point(cell.X - 1, cell.Y + 1);
+            points[2] = new Point(cell.X -1, cell.Y);
+            points[3] = new Point(cell.X + 1, cell.Y);
+            points[4] = cell.Y % 2 == 1
+                    ? new Point(cell.X + 1, cell.Y - 1)
+                    : new Point(cell.X, cell.Y - 1);
+            points[5] = cell.Y % 2 == 1
+                    ? new Point(cell.X, cell.Y - 1)
+                    : new Point(cell.X - 1, cell.Y - 1);
+
+            return points;
+        }
+
         public int CountNumberOfHoles(Point[] cells)
         {
             var holes = 0;
 
             foreach (var cell in cells)
             {
-                var se = cell.Y%2 == 1
-                    ? new Point(cell.X + 1, cell.Y + 1)
-                    : new Point(cell.X, cell.Y + 1);
-                var sw = cell.Y%2 == 1
-                    ? new Point(cell.X, cell.Y + 1)
-                    : new Point(cell.X - 1, cell.Y + 1);
-
-                if (se.X >= 0 && se.X < BoardState.Width && se.Y >= 0 && se.Y < BoardState.Height &&
-                    !BoardState.Cells[se.X, se.Y].HasFlag(CellState.Filled) && !cells.Contains(se))
-                    holes++;
-
-                if (sw.X >= 0 && sw.X < BoardState.Width && sw.Y >= 0 && sw.Y < BoardState.Height &&
-                    !BoardState.Cells[sw.X, sw.Y].HasFlag(CellState.Filled) && !cells.Contains(sw))
-                    holes++;
+                foreach (var n in GetNeighboringPoints(cell))
+                {
+                    if (n.X >= 0 && n.X < BoardState.Width && n.Y >= 0 && n.Y < BoardState.Height &&
+                        !BoardState.Cells[n.X, n.Y].HasFlag(CellState.Filled) && !cells.Contains(n))
+                        holes++;
+                }
             }
 
             return holes;

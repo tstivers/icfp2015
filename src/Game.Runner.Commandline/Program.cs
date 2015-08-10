@@ -31,9 +31,7 @@ namespace Game.Runner.Commandline
             var phrases = new List<string>();
             int timeout;
             int memoryLimit;
-            int cores;
-
-            string output = null;
+            int cores;            
 
             var verbose = false;
             var show_help = false;

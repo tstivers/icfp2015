@@ -47,7 +47,6 @@
   <ItemGroup>
     <Compile Include="BoardState.cs" />
     <Compile Include="DirectionHelpers.cs" />
-    <Compile Include="IController.cs" />
     <Compile Include="LinearCongruentGenerator.cs" />
     <Compile Include="Cell.cs" />
     <Compile Include="GameState.cs" />

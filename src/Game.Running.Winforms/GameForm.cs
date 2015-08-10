@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using Game.Controllers;
 using Game.Core;
@@ -41,7 +42,14 @@ namespace Game.Running.Winforms
                 Controller.OnMove += state =>
                 {
                     RefreshGameState();
+                    Thread.Sleep(100);
                     Application.DoEvents();
+                };
+
+                Controller.OnGameOver += state =>
+                {
+                    RefreshGameState();
+                    Thread.Sleep(200);
                 };
             }
         }
