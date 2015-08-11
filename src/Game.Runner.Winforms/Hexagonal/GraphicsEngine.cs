@@ -99,8 +99,8 @@ namespace Hexagonal
                 p.Width = board.BoardState.ActiveHexBorderWidth;
                 //bitmapGraphics.DrawPolygon(p, board.BoardState.ActiveHex.Points);
                 bitmapGraphics.FillEllipse(sb,
-                    new RectangleF(board.BoardState.ActiveHex.CenterPoint.X - 2,
-                        board.BoardState.ActiveHex.CenterPoint.Y - 2, 4, 4));
+                    new RectangleF(board.BoardState.ActiveHex.CenterPoint.X - 4,
+                        board.BoardState.ActiveHex.CenterPoint.Y - 4, 8, 8));
             }
 
             //

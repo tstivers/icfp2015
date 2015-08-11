@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 using Game.Core;
 using Hexagonal;
@@ -37,6 +38,17 @@ namespace Game.Running.Winforms
         public Board Board { get; set; }
         public GraphicsEngine GraphicsEngine { get; set; }
 
+        public Size PreviousSize { get; set; }
+
+        protected override void OnPaintBackground(PaintEventArgs pe)
+        {
+            if (Size != PreviousSize)
+            {
+                PreviousSize = Size;
+                base.OnPaintBackground(pe);
+            }
+        }
+
         protected override void OnPaint(PaintEventArgs pe)
         {
             if (_gameState != null)
@@ -71,8 +83,9 @@ namespace Game.Running.Winforms
 
         public void ResetGameState()
         {
-            Board = new Board(_gameState.Problem.Width, _gameState.Problem.Height, 15, HexOrientation.Pointy);
+            Board = new Board(_gameState.Problem.Width, _gameState.Problem.Height, 30, HexOrientation.Pointy);
             GraphicsEngine = new GraphicsEngine(Board);
+            PreviousSize = Size.Empty;
             Refresh();
         }
     }

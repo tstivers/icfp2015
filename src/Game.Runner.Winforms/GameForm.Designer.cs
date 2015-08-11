@@ -36,6 +36,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.ScoreLabel = new System.Windows.Forms.Label();
             this.UnitsRemainingLabel = new System.Windows.Forms.Label();
+            this.CCWButton = new System.Windows.Forms.Button();
+            this.CWButton = new System.Windows.Forms.Button();
             this.SolutionBox = new System.Windows.Forms.RichTextBox();
             this.button2 = new System.Windows.Forms.Button();
             this.ButtonSe = new System.Windows.Forms.Button();
@@ -47,8 +49,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.CWButton = new System.Windows.Forms.Button();
-            this.CCWButton = new System.Windows.Forms.Button();
+            this.DrawMovesBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -75,6 +76,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.DrawMovesBox);
             this.splitContainer1.Panel2.Controls.Add(this.CCWButton);
             this.splitContainer1.Panel2.Controls.Add(this.CWButton);
             this.splitContainer1.Panel2.Controls.Add(this.SolutionBox);
@@ -114,6 +116,7 @@
             this.boardControl1.GraphicsEngine = null;
             this.boardControl1.Location = new System.Drawing.Point(0, 0);
             this.boardControl1.Name = "boardControl1";
+            this.boardControl1.PreviousSize = new System.Drawing.Size(502, 498);
             this.boardControl1.Size = new System.Drawing.Size(502, 498);
             this.boardControl1.TabIndex = 0;
             this.boardControl1.Text = "boardControl1";
@@ -174,6 +177,26 @@
             this.UnitsRemainingLabel.TabIndex = 3;
             this.UnitsRemainingLabel.Text = "label4";
             // 
+            // CCWButton
+            // 
+            this.CCWButton.Location = new System.Drawing.Point(167, 14);
+            this.CCWButton.Name = "CCWButton";
+            this.CCWButton.Size = new System.Drawing.Size(35, 23);
+            this.CCWButton.TabIndex = 8;
+            this.CCWButton.Text = "CCW";
+            this.CCWButton.UseVisualStyleBackColor = true;
+            this.CCWButton.Click += new System.EventHandler(this.CCWButton_Click);
+            // 
+            // CWButton
+            // 
+            this.CWButton.Location = new System.Drawing.Point(260, 14);
+            this.CWButton.Name = "CWButton";
+            this.CWButton.Size = new System.Drawing.Size(35, 23);
+            this.CWButton.TabIndex = 7;
+            this.CWButton.Text = "CW";
+            this.CWButton.UseVisualStyleBackColor = true;
+            this.CWButton.Click += new System.EventHandler(this.CWButton_Click);
+            // 
             // SolutionBox
             // 
             this.SolutionBox.Location = new System.Drawing.Point(352, 14);
@@ -181,8 +204,6 @@
             this.SolutionBox.Size = new System.Drawing.Size(259, 137);
             this.SolutionBox.TabIndex = 6;
             this.SolutionBox.Text = "";
-            this.SolutionBox.SelectionChanged += new System.EventHandler(this.SolutionBox_SelectionChanged);
-            this.SolutionBox.TextChanged += new System.EventHandler(this.SolutionBox_TextChanged);
             // 
             // button2
             // 
@@ -273,25 +294,15 @@
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
-            // CWButton
+            // DrawMovesBox
             // 
-            this.CWButton.Location = new System.Drawing.Point(260, 14);
-            this.CWButton.Name = "CWButton";
-            this.CWButton.Size = new System.Drawing.Size(35, 23);
-            this.CWButton.TabIndex = 7;
-            this.CWButton.Text = "CW";
-            this.CWButton.UseVisualStyleBackColor = true;
-            this.CWButton.Click += new System.EventHandler(this.CWButton_Click);
-            // 
-            // CCWButton
-            // 
-            this.CCWButton.Location = new System.Drawing.Point(167, 14);
-            this.CCWButton.Name = "CCWButton";
-            this.CCWButton.Size = new System.Drawing.Size(35, 23);
-            this.CCWButton.TabIndex = 8;
-            this.CCWButton.Text = "CCW";
-            this.CCWButton.UseVisualStyleBackColor = true;
-            this.CCWButton.Click += new System.EventHandler(this.CCWButton_Click);
+            this.DrawMovesBox.AutoSize = true;
+            this.DrawMovesBox.Location = new System.Drawing.Point(11, 80);
+            this.DrawMovesBox.Name = "DrawMovesBox";
+            this.DrawMovesBox.Size = new System.Drawing.Size(86, 17);
+            this.DrawMovesBox.TabIndex = 9;
+            this.DrawMovesBox.Text = "Draw Moves";
+            this.DrawMovesBox.UseVisualStyleBackColor = true;
             // 
             // GameForm
             // 
@@ -305,6 +316,7 @@
             this.Text = "ICFP 2015";
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
@@ -343,6 +355,7 @@
         private System.Windows.Forms.RichTextBox SolutionBox;
         private System.Windows.Forms.Button CCWButton;
         private System.Windows.Forms.Button CWButton;
+        private System.Windows.Forms.CheckBox DrawMovesBox;
     }
 }
 

@@ -41,15 +41,23 @@ namespace Game.Running.Winforms
                 RefreshGameState();
                 Controller.OnMove += state =>
                 {
+                    if (DrawMovesBox.Checked)
+                    {
+                        RefreshGameState();
+                        Thread.Sleep(75);                        
+                    }
+                    Application.DoEvents();
+                };
+
+                Controller.OnLock += state =>
+                {
                     RefreshGameState();
                     Thread.Sleep(100);
-                    Application.DoEvents();
                 };
 
                 Controller.OnGameOver += state =>
                 {
-                    RefreshGameState();
-                    Thread.Sleep(200);
+                    RefreshGameState();                    
                 };
             }
         }
@@ -102,42 +110,6 @@ namespace Game.Running.Winforms
                 SolutionBox.Text += o.tag + "\n";
             }
             //SolutionBox.Text = CurrentGameState.Moves.ToSolutionString();
-        }
-
-        private void SolutionBox_TextChanged(object sender, EventArgs e)
-        {
-            CurrentGameState.Reset(0);
-            var directions = SolutionBox.Text.FromSolutionString();
-
-            try
-            {
-                foreach (var direction in directions)
-                {
-                    CurrentGameState.ExecuteMove(direction);
-                }
-            }
-            catch (GameOverException)
-            {
-            }
-            RefreshGameState();
-        }
-
-        private void SolutionBox_SelectionChanged(object sender, EventArgs e)
-        {
-            CurrentGameState.Reset(0);
-            var directions = SolutionBox.SelectedText.FromSolutionString();
-
-            try
-            {
-                foreach (var direction in directions)
-                {
-                    CurrentGameState.ExecuteMove(direction);
-                }
-            }
-            catch (GameOverException)
-            {
-            }
-            RefreshGameState();
         }
 
         private void CWButton_Click(object sender, EventArgs e)
